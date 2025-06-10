@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Diaries</title>
+</head>
+<body>
+  <h1>My Diaries</h1>
+  <div id="list"></div>
+  <script>
+    async function loadDiaries() {
+      const res = await fetch('/diaries', {headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}});
+      const diaries = await res.json();
+      const listDiv = document.getElementById('list');
+      diaries.forEach(d => {
+        const div = document.createElement('div');
+        div.innerHTML = `<img src="${d.thumbnail || ''}" alt="thumb" width="160"><br>` +
+          `<strong>${d.title}</strong><br>${new Date(d.date).toLocaleDateString()}<br>` +
+          `<a href="/diary_view.html?id=${d.id}">Open</a>`;
+        listDiv.appendChild(div);
+      });
+    }
+    loadDiaries();
+  </script>
+</body>
+</html>
