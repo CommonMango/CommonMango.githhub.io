@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile</title>
+</head>
+<body>
+  <h1>User Profile</h1>
+  <form id="promptForm">
+    <textarea id="prompt" placeholder="Default prompt" rows="4" cols="50"></textarea>
+    <button type="submit">Save Prompt</button>
+  </form>
+  <div id="status"></div>
+  <script>
+    async function loadPrompt() {
+      const res = await fetch('/prompt', {headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}});
+      const data = await res.json();
+      document.getElementById('prompt').value = data.prompt || '';
+    }
+    document.getElementById('promptForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prompt = document.getElementById('prompt').value;
+      const res = await fetch('/prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        },
+        body: JSON.stringify({prompt})
+      });
+      const data = await res.json();
+      if (data.ok) document.getElementById('status').innerText = 'Saved';
+    });
+    loadPrompt();
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Diary</title>
+</head>
+<body>
+  <h1>Diary</h1>
+  <div id="promptWarning" style="color:red;"></div>
+  <div>
+    <textarea id="conversation" placeholder="Talk about your day" rows="10" cols="50"></textarea>
+    <button id="save">Summarize & Save</button>
+  </div>
+  <div id="summary"></div>
+  <div id="link"></div>
+  <script>
+    async function checkPrompt() {
+      const res = await fetch('/prompt', {headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}});
+      const data = await res.json();
+      if (!data.prompt) {
+        document.getElementById('promptWarning').innerText = '! 기본 프롬프트를 설정하세요';
+      }
+    }
+
+    document.getElementById('save').addEventListener('click', async () => {
+      const conversation = document.getElementById('conversation').value;
+      const res = await fetch('/diary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        },
+        body: JSON.stringify({conversation})
+      });
+      const data = await res.json();
+      if (data.summary) {
+        document.getElementById('summary').innerText = data.summary;
+        if (data.id) {
+          document.getElementById('link').innerHTML = `<a href="/diary_view.html?id=${data.id}">Open diary</a>`;
+        }
+      }
+    });
+
+    checkPrompt();
+  </script>
+</body>
+</html>

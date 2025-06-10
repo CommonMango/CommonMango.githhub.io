@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Diary View</title>
+</head>
+<body>
+  <h1 id="title"></h1>
+  <video id="video" controls width="480"></video>
+  <img id="thumbnail" width="160" alt="thumbnail"><br>
+  <input id="newTitle" placeholder="Edit title">
+  <button id="saveTitle">Save Title</button>
+  <br>
+  <input type="text" id="thumbInput" placeholder="Thumbnail URL/base64">
+  <button id="saveThumb">Save Thumbnail</button>
+  <pre id="conversation"></pre>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    async function loadDiary() {
+      const res = await fetch('/diary/' + id, {headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}});
+      const d = await res.json();
+      document.getElementById('title').innerText = d.title;
+      document.getElementById('newTitle').value = d.title;
+      document.getElementById('thumbnail').src = d.thumbnail || '';
+      document.getElementById('video').src = d.video || '';
+      document.getElementById('conversation').innerText = d.conversation;
+    }
+    document.getElementById('saveTitle').addEventListener('click', async () => {
+      const title = document.getElementById('newTitle').value;
+      await fetch('/diary/' + id + '/title', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') },
+        body: JSON.stringify({title})
+      });
+      loadDiary();
+    });
+    document.getElementById('saveThumb').addEventListener('click', async () => {
+      const thumbnail = document.getElementById('thumbInput').value;
+      await fetch('/diary/' + id + '/thumbnail', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token')},
+        body: JSON.stringify({thumbnail})
+      });
+      loadDiary();
+    });
+    loadDiary();
+  </script>
+</body>
+</html>
